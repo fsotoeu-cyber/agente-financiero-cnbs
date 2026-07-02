@@ -2,25 +2,16 @@
 Agente Financiero CNBS
 Analista virtual de indicadores financieros del sistema bancario hondureño.
 
-Arquitectura:
-- Datos: CSV con indicadores oficiales de la CNBS (16 bancos, 7,046 registros)
-- Motor de consulta: Agente Pandas (LangChain) para análisis exacto sobre datos tabulares
-- LLM desarrollo: Groq llama-3.3-70b-versatile / LLM producción: Gemini 2.5 Flash
-- Interfaz: Streamlit
-- Despliegue: Streamlit Community Cloud / Oracle Cloud Infrastructure
-
 Autor: Fausto Soto Euraque - Euraque Analytics
 """
 
 import os
 import pandas as pd
 import streamlit as st
-from langchain_experimental.agents import create_pandas_dataframe_agent
+from langchain.agents import create_pandas_dataframe_agent  # <--- CAMBIO AQUÍ
 
 # ============================================================
 # CONFIGURACIÓN DEL MODELO
-# En Streamlit Cloud, las variables están en st.secrets
-# En local, usar .env (pero se recomienda st.secrets también en local con .streamlit/secrets.toml)
 # ============================================================
 USE_GEMINI = True  # Cambiar a False para usar Groq
 
@@ -40,7 +31,7 @@ else:
     )
 
 # ============================================================
-# CONTEXTO DEL SISTEMA (MEJORADO)
+# CONTEXTO DEL SISTEMA
 # ============================================================
 CONTEXTO_SISTEMA = """
 Eres un analista financiero especializado en el sistema bancario de Honduras.
@@ -82,7 +73,6 @@ REGLAS IMPORTANTES:
 @st.cache_data
 def cargar_datos():
     df = pd.read_csv("data/indicadores_financieros_CNBS.csv")
-    # Convertir fechas a datetime para evitar errores del agente
     df['FechaReporte'] = pd.to_datetime(df['FechaReporte'])
     return df
 
@@ -116,7 +106,6 @@ st.caption("Analista virtual de indicadores financieros del sistema bancario hon
 df = cargar_datos()
 agente = crear_agente(df)
 
-# Sidebar
 with st.sidebar:
     st.subheader("Dataset")
     st.metric("Registros", f"{len(df):,}")
@@ -127,7 +116,6 @@ with st.sidebar:
     st.caption("Fuente: Comisión Nacional de Bancos y Seguros (CNBS)")
     st.caption(f"Modelo: {'Gemini 2.5 Flash' if USE_GEMINI else 'Groq llama-3.3-70b'}")
 
-# Historial de chat
 if "mensajes" not in st.session_state:
     st.session_state.mensajes = [
         {
@@ -140,7 +128,6 @@ for mensaje in st.session_state.mensajes:
     with st.chat_message(mensaje["role"]):
         st.markdown(mensaje["content"])
 
-# Preguntas sugeridas
 st.write("**Preguntas sugeridas:**")
 col1, col2, col3 = st.columns(3)
 pregunta_sugerida = None
@@ -155,7 +142,6 @@ with col3:
     if st.button("Solvencia sobre el mínimo"):
         pregunta_sugerida = "¿Qué bancos tienen índice de adecuación de capital por encima del 14% en 2025?"
 
-# Input
 pregunta_usuario = st.chat_input("Escribe tu pregunta sobre el sistema bancario hondureño...")
 pregunta_final = pregunta_sugerida or pregunta_usuario
 
