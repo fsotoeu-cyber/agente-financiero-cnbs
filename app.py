@@ -9,18 +9,21 @@ Arquitectura:
 - Interfaz: Streamlit
 - Despliegue: Streamlit Community Cloud / Oracle Cloud Infrastructure
 
+Decisión técnica: Groq durante desarrollo por capa gratuita generosa y velocidad.
+Para producción se usa Gemini 2.5 Flash por mayor precisión y estabilidad.
+
 Autor: Fausto Soto Euraque - Euraque Analytics
 """
 
 import os
 import pandas as pd
 import streamlit as st
-from langchain_experimental.agents import create_pandas_dataframe_agent
+from langchain.agents import create_pandas_dataframe_agent  # <--- IMPORT CORREGIDO
 
 # ============================================================
 # CONFIGURACIÓN DEL MODELO
 # En Streamlit Cloud, las variables están en st.secrets
-# En local, usar .env (pero se recomienda st.secrets también en local con .streamlit/secrets.toml)
+# En local, usar .env (o st.secrets con archivo .streamlit/secrets.toml)
 # ============================================================
 USE_GEMINI = True  # Cambiar a False para usar Groq
 
