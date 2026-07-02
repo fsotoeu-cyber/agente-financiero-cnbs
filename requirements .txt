@@ -3,6 +3,7 @@ pandas
 langchain
 langchain-experimental
 langchain-google-genai
+google-generativeai
 langchain-groq
 python-dotenv
 tabulate
