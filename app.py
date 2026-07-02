@@ -8,24 +8,35 @@ Autor: Fausto Soto Euraque - Euraque Analytics
 import os
 import pandas as pd
 import streamlit as st
-from langchain.agents import create_pandas_dataframe_agent  # <--- CAMBIO AQUÍ
+from langchain_experimental.agents import create_pandas_dataframe_agent
 
 # ============================================================
 # CONFIGURACIÓN DEL MODELO
 # ============================================================
 USE_GEMINI = True  # Cambiar a False para usar Groq
 
+# Cargar variables de entorno desde .env (local) o st.secrets (Cloud)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+# Leer claves: primero de st.secrets, luego de os.getenv
+gemini_key = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY"))
+groq_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY"))
+
 if USE_GEMINI:
     from langchain_google_genai import ChatGoogleGenerativeAI
     llm = ChatGoogleGenerativeAI(
         model="gemini-2.5-flash",
-        google_api_key=st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY")),
+        google_api_key=gemini_key,
         temperature=0
     )
 else:
     from langchain_groq import ChatGroq
     llm = ChatGroq(
-        groq_api_key=st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY")),
+        groq_api_key=groq_key,
         model="llama-3.3-70b-versatile",
         temperature=0
     )
@@ -64,7 +75,6 @@ REGLAS IMPORTANTES:
   (.mean()) de todos los registros de ese periodo, no la suma (.sum()).
 - Responde siempre en espanol con precision numerica y contexto financiero claro.
 - Si comparas bancos, ordenalos de mayor a menor en el indicador solicitado.
-- Explica brevemente el contexto financiero de tu respuesta en 2-3 oraciones.
 """
 
 # ============================================================
