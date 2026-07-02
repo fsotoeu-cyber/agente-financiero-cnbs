@@ -7,7 +7,7 @@ Arquitectura:
 - Motor de consulta: Agente Pandas (LangChain) para análisis exacto sobre datos tabulares
 - LLM desarrollo: Groq llama-3.3-70b-versatile / LLM producción: Gemini 2.5 Flash
 - Interfaz: Streamlit
-- Despliegue: Oracle Cloud Infrastructure (OCI) - Always Free VM
+- Despliegue: Streamlit Community Cloud / Oracle Cloud Infrastructure
 
 Decisión técnica: Groq durante desarrollo por capa gratuita generosa y velocidad.
 Para producción se usa Gemini 2.5 Flash por mayor precisión y estabilidad.
@@ -18,35 +18,32 @@ Autor: Fausto Soto Euraque - Euraque Analytics
 import os
 import pandas as pd
 import streamlit as st
-from dotenv import load_dotenv
 from langchain_experimental.agents import create_pandas_dataframe_agent
-
-load_dotenv()
 
 # ============================================================
 # CONFIGURACIÓN DEL MODELO
-# True = Gemini 2.5 Flash (producción)
-# False = Groq llama-3.3-70b-versatile (desarrollo)
 # ============================================================
-USE_GEMINI = True
+# En Streamlit Cloud, las variables están en st.secrets
+# En local, usar .env (pero se recomienda st.secrets también en local con .streamlit/secrets.toml)
+USE_GEMINI = True  # Cambiar a False para usar Groq
 
 if USE_GEMINI:
     from langchain_google_genai import ChatGoogleGenerativeAI
     llm = ChatGoogleGenerativeAI(
         model="gemini-2.5-flash",
-        google_api_key=os.getenv("GEMINI_API_KEY"),
+        google_api_key=st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY")),
         temperature=0
     )
 else:
     from langchain_groq import ChatGroq
     llm = ChatGroq(
-        groq_api_key=os.getenv("GROQ_API_KEY"),
+        groq_api_key=st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY")),
         model="llama-3.3-70b-versatile",
         temperature=0
     )
 
 # ============================================================
-# CONTEXTO DEL SISTEMA
+# CONTEXTO DEL SISTEMA (MEJORADO)
 # ============================================================
 CONTEXTO_SISTEMA = """
 Eres un analista financiero especializado en el sistema bancario de Honduras.
@@ -83,11 +80,13 @@ REGLAS IMPORTANTES:
 """
 
 # ============================================================
-# CARGA DE DATOS
+# CARGA DE DATOS (CON PREPROCESAMIENTO)
 # ============================================================
 @st.cache_data
 def cargar_datos():
     df = pd.read_csv("data/indicadores_financieros_CNBS.csv")
+    # Convertir fechas a datetime para evitar errores del agente
+    df['FechaReporte'] = pd.to_datetime(df['FechaReporte'])
     return df
 
 # ============================================================
@@ -126,7 +125,7 @@ with st.sidebar:
     st.metric("Registros", f"{len(df):,}")
     st.metric("Bancos", df['Banco'].nunique())
     st.metric("Indicadores", df['Indicador'].nunique())
-    st.caption(f"Período: {df['FechaReporte'].min()} a {df['FechaReporte'].max()}")
+    st.caption(f"Período: {df['FechaReporte'].min().strftime('%Y-%m-%d')} a {df['FechaReporte'].max().strftime('%Y-%m-%d')}")
     st.divider()
     st.caption("Fuente: Comisión Nacional de Bancos y Seguros (CNBS)")
     st.caption(f"Modelo: {'Gemini 2.5 Flash' if USE_GEMINI else 'Groq llama-3.3-70b'}")
