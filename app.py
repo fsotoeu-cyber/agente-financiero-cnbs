@@ -5,12 +5,12 @@ Analista virtual de indicadores financieros del sistema bancario hondureño.
 Arquitectura:
 - Datos: CSV con indicadores oficiales de la CNBS (16 bancos, 7,046 registros)
 - Motor de consulta: Agente Pandas (LangChain) para análisis exacto sobre datos tabulares
-- LLM desarrollo: Groq llama-3.1-8b-instant / LLM producción: Gemini 2.0 Flash
+- LLM desarrollo: Groq llama-3.3-70b-versatile / LLM producción: Gemini 2.5 Flash
 - Interfaz: Streamlit
+- Despliegue: Oracle Cloud Infrastructure (OCI) - Always Free VM
 
-Decisión técnica: Se usó Groq durante desarrollo por su generosa capa gratuita
-y velocidad de respuesta. Para producción se migra a Gemini 2.0 Flash por mayor
-precisión en análisis de datos financieros estructurados.
+Decisión técnica: Groq durante desarrollo por capa gratuita generosa y velocidad.
+Para producción se usa Gemini 2.5 Flash por mayor precisión y estabilidad.
 
 Autor: Fausto Soto Euraque - Euraque Analytics
 """
@@ -25,14 +25,15 @@ load_dotenv()
 
 # ============================================================
 # CONFIGURACIÓN DEL MODELO
-# Cambia USE_GEMINI a True para producción en OCI
+# True = Gemini 2.5 Flash (producción)
+# False = Groq llama-3.3-70b-versatile (desarrollo)
 # ============================================================
-USE_GEMINI = False
+USE_GEMINI = True
 
 if USE_GEMINI:
     from langchain_google_genai import ChatGoogleGenerativeAI
     llm = ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",
+        model="gemini-2.5-flash",
         google_api_key=os.getenv("GEMINI_API_KEY"),
         temperature=0
     )
@@ -40,7 +41,7 @@ else:
     from langchain_groq import ChatGroq
     llm = ChatGroq(
         groq_api_key=os.getenv("GROQ_API_KEY"),
-        model="llama-3.1-8b-instant",
+        model="llama-3.3-70b-versatile",
         temperature=0
     )
 
@@ -65,17 +66,20 @@ LAFISE, CUSCATLAN HONDURAS, AZTECA
 
 REGLAS IMPORTANTES:
 - FICOHSA y FICENSA son bancos DIFERENTES. No los confundas nunca.
-  Si tienes duda del nombre exacto, usa df['Banco'].unique() para verificar.
+  Si tienes duda del nombre exacto, usa df["Banco"].unique() para verificar.
 - Si una busqueda con nombre exacto no encuentra resultados, usa
-  df['Indicador'].str.contains('palabra clave', case=False) en lugar de ==
+  df["Indicador"].str.contains("palabra clave", case=False) en lugar de ==
   para evitar fallos por tildes o mayusculas.
 - "BANCOS" y "HONDURAS" son agregados del sistema completo, no bancos individuales.
 - Valores negativos en ROA y ROE indican perdidas del periodo, son datos reales.
 - Valores altos en Cobertura de Mora (>100%) son normales e indican buena cobertura.
 - AZTECA tiene perfil atipico (microfinanzas/alto riesgo): tasas y spread muy altos,
   mayor morosidad. Aclaralo si aparece como valor extremo en comparaciones.
+- Cuando pregunten por el mayor o menor indicador en un periodo, usa el PROMEDIO
+  (.mean()) de todos los registros de ese periodo, no la suma (.sum()).
 - Responde siempre en espanol con precision numerica y contexto financiero claro.
 - Si comparas bancos, ordenalos de mayor a menor en el indicador solicitado.
+- Explica brevemente el contexto financiero de tu respuesta en 2-3 oraciones.
 """
 
 # ============================================================
@@ -125,6 +129,7 @@ with st.sidebar:
     st.caption(f"Período: {df['FechaReporte'].min()} a {df['FechaReporte'].max()}")
     st.divider()
     st.caption("Fuente: Comisión Nacional de Bancos y Seguros (CNBS)")
+    st.caption(f"Modelo: {'Gemini 2.5 Flash' if USE_GEMINI else 'Groq llama-3.3-70b'}")
 
 # Historial de chat
 if "mensajes" not in st.session_state:
