@@ -15,7 +15,7 @@ febrero 2026) y responde preguntas sobre solvencia, morosidad, rentabilidad,
 liquidez y cumplimiento regulatorio, ejecutando código Python real sobre los datos 
 para garantizar precisión numérica.
 
-Construido con LangChain + agente Pandas, Groq (desarrollo) y Gemini 2.0 Flash 
+Construido con LangChain + agente Pandas, Groq llama-3.3-70b-versatile (desarrollo) y Gemini 2.5 Flash 
 (producción), con interfaz Streamlit desplegada en Oracle Cloud Infrastructure.
 
 ---
@@ -45,7 +45,7 @@ Pandas DataFrame
         ↓
 Agente LangChain (zero-shot-react-description)
         ↓
-Groq llama-3.1-8b-instant (desarrollo) / Gemini 2.5 Flash (producción)
+Groq llama-3.3-70b-versatile (desarrollo) / Gemini 2.5 Flash (producción)
         ↓
 Interfaz Streamlit
         ↓
@@ -59,8 +59,8 @@ Deploy en Oracle Cloud Infrastructure (OCI)
 | Decisión | Opción elegida | Razón |
 |----------|---------------|-------|
 | Motor de consulta | Agente Pandas (LangChain) | Las preguntas son analíticas y exactas sobre datos tabulares, no búsqueda semántica en texto libre |
-| LLM desarrollo | Groq llama-3.1-8b-instant | Capa gratuita generosa, permite múltiples iteraciones sin restricciones de cuota |
-| LLM producción | Gemini 2.0 Flash | Mayor precisión en análisis de datos financieros estructurados |
+| LLM desarrollo | Groq llama-3.3-70b-versatile | Capa gratuita generosa, permite múltiples iteraciones sin restricciones de cuota |
+| LLM producción | Gemini 2.5 Flash | Mayor precisión en análisis de datos financieros estructurados |
 | Formato de datos | CSV (convertido desde Excel CNBS) | Formato nativo para Pandas, sin problemas de extracción de tablas como en PDF |
 | Agent type | zero-shot-react-description | Más estable con Groq que tool-calling; permite auto-corrección en errores de filtrado |
 
@@ -89,7 +89,7 @@ Deploy en Oracle Cloud Infrastructure (OCI)
 
 | Pregunta | Respuesta |
 |----------|-----------|
-| ¿Qué banco tiene el mayor índice de morosidad en 2025? | BANCO POPULAR |
+| ¿Qué banco tiene el mayor índice de morosidad en 2025? | BANCO AZTECA |
 | ¿Cuál fue el ROA de Ficohsa en 2025? | 0.87% |
 | ¿Qué bancos tienen adecuación de capital por encima del 14% en 2025? | BANCOCCI, FICENSA, AZTECA, PROMERICA, BANRURAL, HONDURAS, LAFISE, BANHCAFE, BANCO POPULAR, BANCOS |
 | Diferencia entre el ROE de BAC Credomatic y Ficohsa en 2025 | 3.92% |
@@ -172,7 +172,7 @@ streamlit run app.py --server.port 8501 --server.address 0.0.0.0
 - [Streamlit](https://streamlit.io/) — interfaz web
 - [Pandas](https://pandas.pydata.org/) — análisis de datos
 - [Groq API](https://groq.com/) — LLM en desarrollo
-- [Gemini 2.0 Flash](https://ai.google.dev/) — LLM en producción
+- [Gemini 2.5 Flash](https://ai.google.dev/) — LLM en producción
 - [Oracle Cloud Infrastructure](https://www.oracle.com/cloud/) — deploy
 
 ---
