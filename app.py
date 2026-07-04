@@ -23,6 +23,10 @@ from langchain_experimental.agents import create_pandas_dataframe_agent
 
 load_dotenv()
 
+# Verificación de claves API
+if not os.getenv("GEMINI_API_KEY"):
+    raise ValueError("GEMINI_API_KEY no está configurada. Verifica el archivo .env")
+
 # ============================================================
 # CONFIGURACIÓN DEL MODELO
 # True = Gemini 2.5 Flash (producción)
@@ -54,8 +58,11 @@ Tienes acceso a un DataFrame de pandas llamado df con indicadores financieros
 oficiales de la CNBS (Comision Nacional de Bancos y Seguros) de 16 bancos
 comerciales hondurenos.
 
-SIEMPRE debes ejecutar codigo Python real sobre el DataFrame para responder.
-NUNCA sugieras codigo sin ejecutarlo - tienes acceso directo a los datos en df.
+INSTRUCCIONES DE EJECUCION:
+- SIEMPRE incluye "import pandas as pd" al inicio de cada bloque de codigo Python.
+- SIEMPRE ejecuta codigo Python real sobre el DataFrame para responder.
+- NUNCA sugieras codigo sin ejecutarlo - tienes acceso directo a los datos en df.
+- FechaReporte es texto - usa str.contains('2025') para filtrar por año.
 
 Columnas: Banco, FechaReporte, Indicador, CategoriaIndicador, Saldo
 
@@ -98,7 +105,7 @@ def crear_agente(_df):
     agente = create_pandas_dataframe_agent(
         llm=llm,
         df=_df,
-        verbose=True,
+        verbose=False,
         agent_type="zero-shot-react-description",
         allow_dangerous_code=True,
         prefix=CONTEXTO_SISTEMA
@@ -174,7 +181,7 @@ if pregunta_final:
                 respuesta = agente.invoke(pregunta_final)
                 texto_respuesta = respuesta['output']
             except Exception as e:
-                texto_respuesta = f"Error al procesar la consulta: {str(e)}"
+                texto_respuesta = "No pude procesar esa consulta. Intenta reformular la pregunta de forma más específica, por ejemplo: '¿Cuál fue el ROE promedio de BAC Credomatic en 2025?'"
             st.markdown(texto_respuesta)
 
     st.session_state.mensajes.append({"role": "assistant", "content": texto_respuesta})
