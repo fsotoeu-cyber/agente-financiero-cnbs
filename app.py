@@ -9,7 +9,7 @@ Arquitectura Limpia y Homologada:
 - Datos: CSV oficial de la CNBS indexado en memoria como Datetime
 - Caché: Respuestas por sesión para ahorrar tokens de Groq
 
-Autor: Fausto Soto Euraque - Euraque Analytics
+Autor: Fausto Soto Euraque 
 """
 
 import os
