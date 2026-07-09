@@ -144,7 +144,7 @@ Abrir en el navegador: `http://localhost:8501`
 
 ---
 
-🌐 Deploy en OCI
+## 🌐 Deploy en OCI
 
 La aplicación está desplegada en una instancia VM Always Free de Oracle Cloud Infrastructure.
 
@@ -158,7 +158,7 @@ sudo systemctl start agente-cnbs
 sudo systemctl enable agente-cnbs  # Inicia automáticamente al bootear
 ```
 
-**URL pública:** `http://147.15.117.182:8501`
+**URL pública:** [http://147.15.117.182:8501](http://147.15.117.182:8501)
 
 > La app se ejecuta como un servicio `systemd` que se reinicia automáticamente si se cae y arranca sola al bootear la instancia.
 
@@ -172,10 +172,11 @@ Tegucigalpa, Honduras
 
 [LinkedIn](https://www.linkedin.com/in/fsotoeu) | [GitHub](https://github.com/fsotoeu-cyber)
 
-Desarrollado bajo el enfoque de **Euraque Analytics**.
+Desarrollado por **Fausto Enrique Soto**.
 
 ---
 
 ## 📄 Licencia
 
 MIT
+
