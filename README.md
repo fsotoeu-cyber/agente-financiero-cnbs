@@ -144,7 +144,7 @@ Abrir en el navegador: `http://localhost:8501`
 
 ---
 
-## 🌐 Deploy en OCI
+🌐 Deploy en OCI
 
 La aplicación está desplegada en una instancia VM Always Free de Oracle Cloud Infrastructure.
 
@@ -152,12 +152,15 @@ La aplicación está desplegada en una instancia VM Always Free de Oracle Cloud 
 # En la VM de OCI
 cd ~/agente-cnbs
 pip install -r requirements.txt
-streamlit run app.py --server.port 8501 --server.address 0.0.0.0
+
+# Ejecutar con systemd (recomendado para producción)
+sudo systemctl start agente-cnbs
+sudo systemctl enable agente-cnbs  # Inicia automáticamente al bootear
 ```
 
 **URL pública:** `http://147.15.117.182:8501`
 
-> Para mantener la app corriendo en segundo plano, configura un servicio `systemd` o ejecuta con `nohup`.
+> La app se ejecuta como un servicio `systemd` que se reinicia automáticamente si se cae y arranca sola al bootear la instancia.
 
 ---
 
