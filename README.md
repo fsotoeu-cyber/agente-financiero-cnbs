@@ -49,6 +49,25 @@ El `CONTEXTO_SISTEMA` incluye directivas estrictas que actúan como **guardrails
 
 ---
 
+## 📋 Requisitos
+
+- Python 3.10+ (recomendado 3.11 para compatibilidad con LangChain Experimental)
+- Cuenta en Groq (API Key gratuita en https://console.groq.com)
+
+---
+
+## 📦 Tecnologías Clave
+
+| Tecnología | Función |
+|------------|---------|
+| **Streamlit** | Interfaz de usuario web |
+| **LangChain** | Orquestación del agente Pandas |
+| **Groq** | Inferencia de LLM (Llama 3.3 70B) |
+| **Pandas** | Procesamiento y análisis de datos |
+| **python-dotenv** | Gestión de variables de entorno |
+
+---
+
 ## 📊 Especificaciones del Proyecto
 
 | Característica | Detalle |
@@ -148,14 +167,44 @@ Abrir en el navegador: `http://localhost:8501`
 
 La aplicación está desplegada en una instancia VM Always Free de Oracle Cloud Infrastructure.
 
+### Opción A: Ejecución manual (desarrollo/pruebas)
+
 ```bash
 # En la VM de OCI
 cd ~/agente-cnbs
 pip install -r requirements.txt
+streamlit run app.py --server.port 8501 --server.address 0.0.0.0
+```
 
-# Ejecutar con systemd (recomendado para producción)
+### Opción B: Servicio systemd (producción recomendada)
+
+Crea el archivo `/etc/systemd/system/agente-cnbs.service`:
+
+```ini
+[Unit]
+Description=Agente Financiero CNBS
+After=network.target
+
+[Service]
+Type=simple
+User=opc
+WorkingDirectory=/home/opc/agente-financiero-cnbs
+Environment=PATH=/home/opc/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=GROQ_API_KEY=tu_clave_aqui
+ExecStart=/usr/bin/python3 -m streamlit run /home/opc/agente-financiero-cnbs/app.py --server.port=8501 --server.address=0.0.0.0
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Luego activá:
+
+```bash
+sudo systemctl daemon-reload
 sudo systemctl start agente-cnbs
-sudo systemctl enable agente-cnbs  # Inicia automáticamente al bootear
+sudo systemctl enable agente-cnbs
 ```
 
 **URL pública:** [http://147.15.117.182:8501](http://147.15.117.182:8501)
@@ -172,11 +221,10 @@ Tegucigalpa, Honduras
 
 [LinkedIn](https://www.linkedin.com/in/fsotoeu) | [GitHub](https://github.com/fsotoeu-cyber)
 
-Desarrollado por **Fausto Enrique Soto**.
+Desarrollado bajo el enfoque de **Euraque Analytics**.
 
 ---
 
 ## 📄 Licencia
 
 MIT
-
