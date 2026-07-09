@@ -19,7 +19,7 @@ La aplicación está desplegada y operativa en Oracle Cloud Infrastructure:
 
 ---
 
-## 🚀 Detalles Técnicos (Arquitectura v2.1)
+## 🚀 Detalles Técnicos (Arquitectura)
 
 Esta versión se ha diseñado bajo principios de **eficiencia de recursos (ROI)** y **precisión analítica**. Los puntos clave de la arquitectura son:
 
@@ -119,7 +119,7 @@ agente-financiero-cnbs/
 ├── requirements.txt        # Dependencias (Streamlit, LangChain, Pandas)
 ├── .env.example            # Plantilla para variables de entorno
 └── data/
-    └── indicadores_financieros_CNBS.csv  # Dataset oficial CNBS
+    └── indicadores_financieros_CNBS.csv  # Dataset
 ```
 
 ---
