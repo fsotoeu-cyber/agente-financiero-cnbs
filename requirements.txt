@@ -1,9 +1,8 @@
 streamlit
 pandas
+numpy
+openpyxl
 langchain
-langchain-community
-langchain-experimental
-langchain-google-genai
 langchain-groq
+langchain-experimental
 python-dotenv
-tabulate
