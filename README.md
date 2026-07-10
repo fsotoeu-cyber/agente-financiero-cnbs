@@ -15,7 +15,7 @@ La aplicación está desplegada y operativa en Oracle Cloud Infrastructure:
 | Dashboard Principal | Consulta Analítica en Vivo |
 |---------------------|----------------------------|
 | ![Dashboard](assets/captura-1.png) | ![Consulta](assets/captura-2.png) |
-| Interfaz con métricas de estado, historial de chat y caché de respuestas | Ejemplo de consulta sobre ComparaR el ROA de BAC Credomatic y Ficohsa en 2025 con respuesta contextual y precisión numérica En 2025. |
+| Interfaz con métricas de estado, historial de chat y caché de respuestas | Ejemplo de consulta sobre ComparaR el ROA de BAC Credomatic y Ficohsa en 2025. |
 
 ---
 
