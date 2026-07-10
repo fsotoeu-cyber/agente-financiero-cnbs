@@ -1,8 +1,8 @@
 # 🏦 Agente Financiero CNBS (v2.1)
 
-**Agente Financiero CNBS** es un analista virtual especializado en indicadores financieros del sistema bancario hondureño. Construido con Python, utiliza modelos de lenguaje (LLM) y agentes inteligentes para interactuar con datos reales de la Comisión Nacional de Bancos y Seguros (CNBS).
+**Agente Financiero CNBS** es una aplicación de análisis financiero asistida por Inteligencia Artificial, especializada en el sistema bancario hondureño. Desarrollada con Python, LangChain, Pandas y modelos de lenguaje (LLMs), permite consultar y analizar en lenguaje natural los indicadores financieros oficiales publicados por la Comisión Nacional de Bancos y Seguros (CNBS).
 
-Este proyecto no es solo un chatbot; es un motor analítico que traduce lenguaje natural en operaciones precisas de pandas, garantizando que las respuestas financieras sean **calculadas y no alucinadas**.
+Más que un chatbot, es un motor de análisis financiero que traduce consultas en lenguaje natural en operaciones reales de análisis sobre datos oficiales utilizando Pandas y un agente inteligente de LangChain. Esto permite que las respuestas se obtengan mediante cálculos ejecutados sobre el conjunto de datos, reduciendo las alucinaciones del modelo y ofreciendo resultados precisos, reproducibles y fundamentados en información oficial.
 
 ---
 
@@ -11,6 +11,8 @@ Este proyecto no es solo un chatbot; es un motor analítico que traduce lenguaje
 La aplicación está desplegada y operativa en Oracle Cloud Infrastructure:
 
 🔗 **URL pública:** [http://147.15.117.182:8501](http://147.15.117.182:8501)
+
+> ⚠️ **Nota:** La aplicación está desplegada en OCI Always Free. Tras periodos de inactividad, la primera carga puede tomar unos segundos. Si la URL no responde de inmediato, recarga la página.
 
 | Dashboard Principal | Consulta Analítica en Vivo |
 |---------------------|----------------------------|
@@ -21,7 +23,29 @@ La aplicación está desplegada y operativa en Oracle Cloud Infrastructure:
 
 ## 🚀 Detalles Técnicos (Arquitectura v2.1)
 
-Esta versión se ha diseñado bajo principios de **eficiencia de recursos (ROI)** y **precisión analítica**. Los puntos clave de la arquitectura son:
+Esta versión se ha diseñado bajo principios de eficiencia de recursos (ROI) y precisión analítica. Los puntos clave de la arquitectura son:
+
+### 🗺️ Flujo de Datos y Componentes
+```plain
+     Usuario
+        │
+        ▼
+    Streamlit (Interfaz de Usuario)
+        │
+        ▼
+   LangChain Agent (Orquestador)
+        │
+        ▼
+   Groq API (Llama 3.3 70B)
+        │
+   Tool Calling (Generación de Código)
+        │
+        ▼
+   Pandas (Cómputo Determinista)
+        │
+        ▼
+   Dataset CSV (Fuente Única de Verdad)
+```
 
 ### 1. Motor de Razonamiento (LangChain + Groq)
 
