@@ -129,10 +129,10 @@ agente-financiero-cnbs/
 ### 1. Clonar el repositorio
 
 ```bash
-# 1. Clonar el repositorio
+# a. Clonar el repositorio
 git clone https://github.com/fsotoeu-cyber/agente-financiero-cnbs.git
 
-# 2. Ingresar a la carpeta del proyecto
+# b. Ingresar a la carpeta del proyecto
 cd agente-financiero-cnbs
 ```
 
