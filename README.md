@@ -108,19 +108,23 @@ El `CONTEXTO_SISTEMA` incluye directivas estrictas que actúan como **guardrails
 
 ## 📋 Dataset
 
+## 📋 Dataset y Alcance de Datos
+
 - **Fuente:** Comisión Nacional de Bancos y Seguros (CNBS) – Honduras
 - **Registros:** 7,046
 - **Bancos:** 16 bancos comerciales hondureños
-- **Indicadores:** 17 indicadores en 6 categorías
+- **Naturaleza de los datos:** Todos los valores están expresados como **porcentajes y ratios financieros**, no como volúmenes monetarios.
 
 | Categoría | Indicadores incluidos |
 |-----------|------------------------|
-| **Solvencia** | Índice de adecuación de capital |
-| **Calidad de Activos** | Índice de morosidad sobre cartera crediticia total |
-| **Liquidez** | Cobertura de mora, calces de moneda |
-| **Rentabilidad** | ROA, ROE, tasa activa, spread de intermediación |
-| **Gestión** | Gastos administrativos, eficiencia |
-| **Cumplimiento** | Indicadores regulatorios CNBS |
+| **Solvencia** | Índice de Adecuación de Capital |
+| **Rentabilidad** | ROA, ROE, Tasa Activa, Tasa Pasiva, Spread de intermediación |
+| **Calidad de Activos** | Índice de Morosidad, Cobertura de Mora, Cartera de Tarjetas |
+| **Liquidez** | Cobertura de Depósitos con Activos Líquidos, Calces de moneda |
+| **Gestión** | Gastos de Administración sobre Activos, Eficiencia (Gastos/Ingresos) |
+| **Cumplimiento** | Ratio de Cobertura de Liquidez, Inversión en Activos Fijos |
+
+> ⚠️ **Limitaciones del Motor Analítico:** Debido a que el dataset consta exclusivamente de ratios y tasas porcentuales, la aplicación **no puede determinar volúmenes absolutos** (ej. "Activos Totales en Lempiras" o "qué banco tiene más dinero"). El agente está instruido (vía guardrails) para denegar respuestas sobre el "tamaño" o "banco más grande", evitando que el LLM sume erróneamente porcentajes para simular volúmenes.
 
 ---
 
