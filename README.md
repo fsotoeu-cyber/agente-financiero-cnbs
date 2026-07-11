@@ -124,7 +124,7 @@ El `CONTEXTO_SISTEMA` incluye directivas estrictas que actúan como **guardrails
 | **Gestión** | Gastos de Administración sobre Activos, Eficiencia (Gastos/Ingresos) |
 | **Cumplimiento** | Ratio de Cobertura de Liquidez, Inversión en Activos Fijos |
 
-> ⚠️ **Limitaciones del Motor Analítico:** Debido a que el dataset consta exclusivamente de ratios y tasas porcentuales, la aplicación **no puede determinar volúmenes absolutos** (ej. "Activos Totales en Lempiras" o "qué banco tiene más dinero"). El agente está instruido (vía guardrails) para denegar respuestas sobre el "tamaño" o "banco más grande", evitando que el LLM sume erróneamente porcentajes para simular volúmenes.
+> ⚠️ **Limitaciones del Motor Analítico (Volúmenes y Tamaños):** Aunque el agente conversacional intentará responder de la mejor manera a consultas sobre "cuál es el banco más grande" o "qué banco tiene más dinero", es fundamental considerar que **el dataset consta exclusivamente de ratios y tasas porcentuales**. Al no existir datos de volúmenes monetarios absolutos (como Activos Totales en Lempiras), el modelo podría intentar sumar porcentajes erróneamente para simular un volumen monetario o basarse en su conocimiento preentrenado de internet. Cualquier respuesta generada sobre el "tamaño" de las instituciones excede el alcance de la fuente oficial de datos y debe interpretarse con precaución.
 
 ---
 
