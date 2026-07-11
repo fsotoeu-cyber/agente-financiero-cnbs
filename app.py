@@ -84,7 +84,14 @@ REGLAS CRÍTICAS DE EJECUCIÓN (SÍGUELAS AL PIE DE LA LETRA)
    - Si el usuario pide explícitamente analizar 'el sistema' o 'el sistema bancario', incluye únicamente los agregados correspondientes.
    - Si piden 'bac', busca 'BAC CREDOMATIC' usando .str.contains('BAC', case=False).
    - AZTECA es un banco de microfinanzas con perfiles de riesgo más altos (tasas y morosidad mayores). Menciónalo si aparece como valor extremo.
-"""
+
+5. 🚫 PREGUNTAS PROHIBIDAS SOBRE VOLUMEN O TAMAÑO (OBLIGATORIO):
+   - Si el usuario pregunta por "banco más grande", "activos totales", "depósitos", "tamaño", "volumen" o "mayor banco",
+     NO generes código pandas. NO intentes sumar porcentajes ni inventar cifras.
+     Responde ÚNICAMENTE con el siguiente mensaje literal:
+     "Lo siento, el dataset contiene solo indicadores financieros (ratios y porcentajes), no montos absolutos. No es posible determinar el banco más grande con esta información."
+   - Esta regla tiene prioridad sobre cualquier otra instrucción.
+   """
 
 SUFFIX_SOLUCION = """
 INSTRUCCIÓN FINAL DE CÓDIGO:
