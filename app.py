@@ -14,8 +14,10 @@ Autor: Fausto Soto Euraque
 
 import os
 import time
+import re
 import streamlit as st
 import pandas as pd
+from typing import Optional
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_experimental.agents import create_pandas_dataframe_agent
@@ -55,6 +57,49 @@ def cargar_datos():
 df = cargar_datos()
 
 # ============================================================
+# 2.5 FUNCIÓN MANUAL PARA PREGUNTAS DE MOROSIDAD
+# ============================================================
+def responder_morosidad(pregunta: str) -> Optional[str]:
+    """
+    Detecta preguntas sobre morosidad y responde con el banco que tiene el mayor índice.
+    Retorna la respuesta como string, o None si no es una pregunta de morosidad.
+    """
+    # Captura "morosidad" o "morisidad" (error de dedo común)
+    if not re.search(r'mor[oi]sidad', pregunta.lower()):
+        return None
+
+    try:
+        # Extraer el año de la pregunta (si existe)
+        años = re.findall(r'\b(202[4-6])\b', pregunta)
+        año = int(años[0]) if años else None
+
+        # Indicador exacto (con tilde, tal cual está en el CSV)
+        indicador_objetivo = 'ÍNDICE DE MOROSIDAD SOBRE CARTERA CREDITICIA TOTAL'
+
+        # Construir filtro
+        filtro = (df['Indicador'] == indicador_objetivo)
+        if año:
+            filtro &= (df['FechaReporte'].dt.year == año)
+        filtro &= ~df['Banco'].isin(['BANCOS', 'HONDURAS'])
+
+        # Aplicar filtro
+        datos = df[filtro]
+
+        if datos.empty:
+            return f"No hay información de morosidad para el período solicitado{' (' + str(año) + ')' if año else ''}."
+
+        # Calcular promedio anual por banco y ordenar descendente
+        resultado = datos.groupby('Banco')['Saldo'].mean().sort_values(ascending=False)
+        banco = resultado.index[0]
+        valor = resultado.iloc[0]
+        año_str = f" en {año}" if año else " (en el período disponible)"
+
+        return f"El banco con el mayor índice de morosidad sobre cartera crediticia total{año_str} es **{banco}**, con un índice promedio de **{valor:.2f}%**."
+
+    except Exception as e:
+        return f"❌ Error al procesar la consulta de morosidad: {str(e)}"
+
+# ============================================================
 # 3. PROMPT DE INGENIERÍA PARA EL AGENTE DE LANGCHAIN
 # ============================================================
 CONTEXTO_SISTEMA = """
@@ -85,13 +130,13 @@ REGLAS CRÍTICAS DE EJECUCIÓN (SÍGUELAS AL PIE DE LA LETRA)
    - Si piden 'bac', busca 'BAC CREDOMATIC' usando .str.contains('BAC', case=False).
    - AZTECA es un banco de microfinanzas con perfiles de riesgo más altos (tasas y morosidad mayores). Menciónalo si aparece como valor extremo.
 
-5. 🚫 PREGUNTAS PROHIBIDAS SOBRE VOLUMEN O TAMAÑO (OBLIGATORIO):
+5.  PREGUNTAS PROHIBIDAS SOBRE VOLUMEN O TAMAÑO (OBLIGATORIO):
    - Si el usuario pregunta por "banco más grande", "activos totales", "depósitos", "tamaño", "volumen" o "mayor banco",
      NO generes código pandas. NO intentes sumar porcentajes ni inventar cifras.
      Responde ÚNICAMENTE con el siguiente mensaje literal:
      "Lo siento, el dataset contiene solo indicadores financieros (ratios y porcentajes), no montos absolutos. No es posible determinar el banco más grande con esta información."
    - Esta regla tiene prioridad sobre cualquier otra instrucción.
-   """
+"""
 
 SUFFIX_SOLUCION = """
 INSTRUCCIÓN FINAL DE CÓDIGO:
@@ -121,11 +166,20 @@ agente_cnbs = create_pandas_dataframe_agent(
 if "cache_respuestas" not in st.session_state:
     st.session_state.cache_respuestas = {}
 
-def consultar_con_cache(pregunta: str) -> str:
+def consultar_con_cache(pregunta: str) -> tuple[str, bool]:
     """
     Consulta el agente con caché por sesión.
     Si la pregunta ya fue respondida, devuelve la respuesta cacheada sin gastar tokens.
     """
+    # --- FILTRO MANUAL PARA MOROSIDAD (prioridad máxima) ---
+    respuesta_especial = responder_morosidad(pregunta)
+    if respuesta_especial:
+        # Guardar en caché también para futuras repeticiones
+        clave = pregunta.strip().lower()
+        st.session_state.cache_respuestas[clave] = respuesta_especial
+        return respuesta_especial, True  # (respuesta, es_cache)
+    # ---------------------------------------------------------
+
     clave = pregunta.strip().lower()
 
     if clave in st.session_state.cache_respuestas:
@@ -224,7 +278,7 @@ if pregunta_final:
     with st.chat_message("user"):
         st.markdown(pregunta_final)
 
-    # Procesar consulta mediante el agente de LangChain (con caché)
+    # Procesar consulta mediante la función con caché (que ya incluye el filtro de morosidad)
     with st.chat_message("assistant"):
         respuesta_texto, es_cache = consultar_con_cache(pregunta_final)
 
