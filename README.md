@@ -26,12 +26,19 @@ La aplicación está desplegada y operativa en Oracle Cloud Infrastructure:
 Esta versión se ha diseñado bajo principios de eficiencia de recursos (ROI) y precisión analítica. Los puntos clave de la arquitectura son:
 
 ### 🗺️ Flujo de Datos y Componentes
+
 ```plain
      Usuario
         │
         ▼
-    Streamlit (Interfaz de Usuario)
+   Streamlit (Interfaz de Usuario)
         │
+        ▼
+   ¿Es morosidad? ──SÍ──→ Filtro Manual (Python) → Respuesta directa
+        │ NO
+        ▼
+   ¿Es volumen/tamaño? ──SÍ──→ Mensaje de error estándar
+        │ NO
         ▼
    LangChain Agent (Orquestador)
         │
@@ -65,7 +72,16 @@ El `CONTEXTO_SISTEMA` incluye directivas estrictas que actúan como **guardrails
 - **Formato Numérico:** Los valores de la columna `Saldo` ya están en porcentaje directo. El agente está instruido para **no multiplicar por 100**.
 - **Contexto de Negocio:** Se incluye una regla específica para **AZTECA**, indicando que es un banco de microfinanzas con perfiles de riesgo más altos (tasas y morosidad mayores), lo que enriquece las respuestas.
 
-### 3. Optimización de Rendimiento
+### 3. Arquitectura Híbrida (Determinismo Garantizado)
+
+Para garantizar precisión absoluta en indicadores críticos, implementamos una **capa de filtros manuales** que se ejecutan antes del agente LangChain:
+
+- **Filtro de Morosidad:** Las consultas sobre morosidad se resuelven con código Python determinista (sin LLM), usando el indicador exacto `'ÍNDICE DE MOROSIDAD SOBRE CARTERA CREDITICIA TOTAL'`. Esto elimina inconsistencias causadas por tildes en los nombres de indicadores.
+- **Filtro de Volumen:** Las preguntas sobre "banco más grande", "activos totales" o "depósitos" se detectan automáticamente y responden con un mensaje estándar, evitando alucinaciones del modelo al intentar sumar porcentajes.
+
+El agente LangChain se mantiene como motor principal para indicadores estables (ROA, ROE, Solvencia, Liquidez), combinando la flexibilidad del LLM con la precisión del código determinista.
+
+### 4. Optimización de Rendimiento
 
 - **Caché de Respuestas:** Implementamos `st.session_state` para almacenar consultas ya resueltas. Esto reduce drásticamente el consumo de tokens en la API de Groq cuando los usuarios repiten preguntas, mejorando la latencia a prácticamente cero.
 - **Carga de Datos:** El dataset se carga utilizando `@st.cache_data`, asegurando que el archivo CSV se lea en memoria solo una vez por sesión.
@@ -75,7 +91,8 @@ El `CONTEXTO_SISTEMA` incluye directivas estrictas que actúan como **guardrails
 
 ## 📋 Requisitos
 
-- Python 3.10+ (recomendado 3.11 para compatibilidad con LangChain Experimental)
+- Python 3.9+ (probado en producción con 3.9.25 en OCI)
+- Python 3.10+ recomendado para desarrollo local (mejor compatibilidad con LangChain Experimental)
 - Cuenta en Groq (API Key gratuita en https://console.groq.com)
 
 ---
@@ -97,7 +114,7 @@ El `CONTEXTO_SISTEMA` incluye directivas estrictas que actúan como **guardrails
 | Característica | Detalle |
 |----------------|---------|
 | **Framework UI** | Streamlit |
-| **Motor de IA** | LangChain Pandas Agent (Tool-calling) |
+| **Motor de IA** | LangChain Pandas Agent (Tool-calling) + Filtros Manuales |
 | **Modelo (LLM)** | Llama 3.3 70B (vía Groq API) |
 | **Procesamiento** | Pandas (Vectorizado) |
 | **Deploy** | Oracle Cloud Infrastructure (OCI) |
@@ -105,8 +122,6 @@ El `CONTEXTO_SISTEMA` incluye directivas estrictas que actúan como **guardrails
 | **Período** | Enero 2024 – Febrero 2026 |
 
 ---
-
-## 📋 Dataset
 
 ## 📋 Dataset y Alcance de Datos
 
@@ -124,18 +139,28 @@ El `CONTEXTO_SISTEMA` incluye directivas estrictas que actúan como **guardrails
 | **Gestión** | Gastos de Administración sobre Activos, Eficiencia (Gastos/Ingresos) |
 | **Cumplimiento** | Ratio de Cobertura de Liquidez, Inversión en Activos Fijos |
 
-> ⚠️ **Limitaciones del Motor Analítico (Volúmenes y Tamaños):** Aunque el agente conversacional intentará responder de la mejor manera a consultas sobre "cuál es el banco más grande" o "qué banco tiene más dinero", es fundamental considerar que **el dataset consta exclusivamente de ratios y tasas porcentuales**. Al no existir datos de volúmenes monetarios absolutos (como Activos Totales en Lempiras), el modelo podría intentar sumar porcentajes erróneamente para simular un volumen monetario o basarse en su conocimiento preentrenado de internet. Cualquier respuesta generada sobre el "tamaño" de las instituciones excede el alcance de la fuente oficial de datos y debe interpretarse con precaución.
+> ⚠️ **Limitaciones del Motor Analítico (Volúmenes y Tamaños):**
+>
+> El dataset contiene exclusivamente **ratios y tasas porcentuales**; no incluye volúmenes monetarios absolutos (como Activos Totales en Lempiras). Por lo tanto, **no es posible determinar el banco más grande ni el tamaño de las instituciones** con esta fuente de datos.
+>
+> **Manejo en la aplicación:**
+> - Si el usuario pregunta por el "banco más grande", "activos totales" o "depósitos", el sistema **detecta automáticamente** la consulta y responde con un mensaje estándar, sin invocar al modelo de lenguaje. Esto evita que el LLM intente sumar porcentajes o inventar cifras.
+> - Esta lógica está implementada como un **filtro en Python** que se ejecuta antes que el agente de LangChain, garantizando una respuesta honesta y consistente.
+> - De manera similar, las preguntas sobre **morosidad** se resuelven con código Pandas determinista en la capa de pre‑filtro, lo que asegura precisión y ahorro de tokens.
 
 ---
 
 ## 💬 Ejemplos de Consultas y Respuestas Reales
 
-| Pregunta | Respuesta del Agente |
-|----------|----------------------|
-| ¿Qué banco tiene el mayor índice de morosidad en 2025? | **AZTECA** con **10.40%**. Contexto: banco de microfinanzas con perfiles de riesgo más altos. |
-| ¿Cuál fue el ROA de Ficohsa en 2025? | **0.77%** |
-| Compara el ROA de BAC Credomatic y Ficohsa en 2025 | **BAC: 1.03%** vs **Ficohsa: 0.77%**. BAC tuvo un desempeño ligeramente mejor en rentabilidad sobre activos. |
-| ¿Qué bancos tienen adecuación de capital > 14% en 2025? | **AZTECA** (25.53%), **BANHCAFE** (22.00%), **BANCOCCI** (18.41%), **BANCO POPULAR** (15.60%), **BANRURAL** (14.51%) |
+| Pregunta | Respuesta del Agente | Tipo |
+|----------|----------------------|------|
+| ¿Qué banco tiene el mayor índice de morosidad en 2025? | **AZTECA** con **10.35%**. Contexto: banco de microfinanzas con perfiles de riesgo más altos. | Filtro manual |
+| ¿Cuál fue el ROA de Ficohsa en 2025? | **0.77%** | Agente LangChain |
+| Compara el ROA de BAC Credomatic y Ficohsa en 2025 | **BAC: 1.03%** vs **Ficohsa: 0.77%**. BAC tuvo un desempeño ligeramente mejor. | Agente LangChain + Caché |
+| ¿Qué bancos tienen adecuación de capital > 14% en 2025? | **AZTECA** (25.53%), **BANHCAFE** (22.00%), **BANCOCCI** (18.41%), etc. | Agente LangChain |
+| ¿Cuál es el banco más grande? | *"Lo siento, el dataset contiene solo indicadores financieros (ratios y porcentajes), no montos absolutos..."* | Filtro prohibido | ⚡ **Cero tokens de Groq.** Denegación controlada. |
+
+> 💡 **Nota sobre caché:** Las consultas repetidas se responden instantáneamente desde `st.session_state`, sin consumir tokens de Groq. El badge `⚡ Respuesta recuperada desde caché` indica ahorro de costos.
 
 ---
 
@@ -143,7 +168,7 @@ El `CONTEXTO_SISTEMA` incluye directivas estrictas que actúan como **guardrails
 
 ```plain
 agente-financiero-cnbs/
-├── app.py                  # Motor principal: UI + Agente + Lógica (v2.1)
+├── app.py                  # Motor principal: UI + Agente + Lógica híbrida (v2.1)
 ├── requirements.txt        # Dependencias (Streamlit, LangChain, Pandas)
 ├── .env.example            # Plantilla para variables de entorno
 └── data/
